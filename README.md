@@ -1,3 +1,11 @@
+<blockquote style="background-color: #fffbe030; border-color: #ffec82;">
+  <strong>Note</strong>: this is a fork of the <a href="https://github.com/Calciumdibromid/CaBr2">CaBr2 App</a> and
+  intended to be a temporary solution to build problems of Tauri in windows.
+  As soon as they are fixed (i.e. Tauri beta has been released) this webapp will be shut down.
+
+  Report issues to https://github.com/Calciumdibromid/CaBr2/issues
+</blockquote>
+
 # CaBr2
 
 [![License: GPL3+](https://img.shields.io/badge/License-GPL3+-blue.svg?style=flat-square)](https://www.gnu.org/licenses/gpl-3.0.en.html)
