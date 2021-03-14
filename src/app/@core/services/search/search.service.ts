@@ -38,7 +38,7 @@ export class SearchService {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ provider, searchType, pattern: query })
+      body: JSON.stringify({ provider, searchArgument: { searchType, pattern: query } })
     }) as unknown as Promise<string[]>);
   }
 
