@@ -1,19 +1,20 @@
 import { combineLatest, Observable } from 'rxjs';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { map, switchMap } from 'rxjs/operators';
+import { first, map, switchMap } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+
 import { AlertService } from '../@core/services/alertsnackbar/altersnackbar.service';
 import { CaBr2Document } from '../@core/services/loadSave/loadSave.model';
-import { ConfigModel } from '../@core/models/config.model';
+import { ConfigService } from '../@core/services/config/config.service';
+import { docsTemplate } from '../../assets/docsTemplate.json';
 import { GlobalModel } from '../@core/models/global.model';
 import { LoadSaveService } from '../@core/services/loadSave/loadSave.service';
+import { LocalizedStrings } from '../@core/services/i18n/i18n.service';
 import Logger from '../@core/utils/logger';
 import { ManualComponent } from '../manual/manual.component';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { ReportBugComponent } from '../report-bug/report-bug.component';
+import { SettingsComponent } from '../settings/settings.component';
 import { TauriService } from '../@core/services/tauri/tauri.service';
-
-import { docsTemplate } from '../../assets/docsTemplate.json';
-import { strings } from '../../assets/strings.json';
 
 const logger = new Logger('menubar');
 
@@ -26,19 +27,23 @@ export class MenubarComponent implements OnInit {
   @Output()
   readonly darkModeSwitched = new EventEmitter<boolean>();
 
-  strings = strings;
+  strings!: LocalizedStrings;
+
+  programmVersion!: string;
 
   private loadFilter: string[] = [];
   private saveFilter: string[] = [];
 
   constructor(
     public globals: GlobalModel,
-    public config: ConfigModel,
     private loadSaveService: LoadSaveService,
     private tauriService: TauriService,
     private alertService: AlertService,
+    private configService: ConfigService,
     private dialog: MatDialog,
   ) {
+    this.globals.localizedStringsObservable.subscribe((strings) => (this.strings = strings));
+
     this.loadSaveService.getAvailableDocumentTypes().subscribe(
       (types) => {
         this.loadFilter = types.load;
@@ -50,7 +55,7 @@ export class MenubarComponent implements OnInit {
       },
       (err) => {
         logger.error('could not get document types:', err);
-        this.alertService.error(strings.error.getAvailableDocumentTypes);
+        this.alertService.error(this.strings.error.getAvailableDocumentTypes);
       },
     );
   }
@@ -73,6 +78,11 @@ export class MenubarComponent implements OnInit {
     this.globals.inCaseOfDangerSubject.next(docsTemplate.inCaseOfDangerSubject);
 
     this.globals.substanceDataSubject.next([]);
+
+    this.configService
+      .getProgramVersion()
+      .pipe(first())
+      .subscribe((version) => (this.programmVersion = version));
   }
 
   newDocument(): void {
@@ -81,6 +91,10 @@ export class MenubarComponent implements OnInit {
 
   scroll(el: HTMLElement): void {
     el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  openMail(): void {
+    this.dialog.open(ReportBugComponent);
   }
 
   modelToDocument(): Observable<CaBr2Document> {
@@ -119,13 +133,14 @@ export class MenubarComponent implements OnInit {
         filter: this.loadFilter.join(';'),
         multiple: false,
       })
+      .pipe(first())
       .subscribe(
         (path) => {
           this.loadSaveService.loadDocument(path as string).subscribe(
             (res) => this.documentToModel(res),
             (err) => {
               logger.error('loading file failed:', err);
-              this.alertService.error(strings.error.loadFile);
+              this.alertService.error(this.strings.error.loadFile);
             },
           );
         },
@@ -142,11 +157,14 @@ export class MenubarComponent implements OnInit {
     }
 
     combineLatest([this.tauriService.save({ filter: type }), this.modelToDocument()])
-      .pipe(switchMap((value) => this.loadSaveService.saveDocument(type, value[0] as string, value[1])))
+      .pipe(
+        switchMap((value) => this.loadSaveService.saveDocument(type, value[0] as string, value[1])),
+        first(),
+      )
       .subscribe(
         (res) => {
           logger.debug(res);
-          this.alertService.success(strings.success.saveFile);
+          this.alertService.success(this.strings.success.saveFile);
         },
         (err) => {
           logger.error(err);
@@ -157,7 +175,7 @@ export class MenubarComponent implements OnInit {
             this.saveFile(type);
             return;
           }
-          this.alertService.error(strings.error.saveFile);
+          this.alertService.error(this.strings.error.saveFile);
         },
       );
   }
@@ -165,11 +183,14 @@ export class MenubarComponent implements OnInit {
   exportPDF(): void {
     logger.trace('exportPDF()');
     combineLatest([this.tauriService.save({ filter: 'pdf' }), this.modelToDocument()])
-      .pipe(switchMap((value) => this.loadSaveService.saveDocument('pdf', value[0] as string, value[1])))
+      .pipe(
+        switchMap((value) => this.loadSaveService.saveDocument('pdf', value[0] as string, value[1])),
+        first(),
+      )
       .subscribe(
         (res) => {
           logger.debug(res);
-          this.alertService.success(strings.success.exportPDF);
+          this.alertService.success(this.strings.success.exportPDF);
         },
         (err) => {
           logger.error(err);
@@ -180,16 +201,26 @@ export class MenubarComponent implements OnInit {
             this.exportPDF();
             return;
           }
-          this.alertService.error(strings.error.exportPDF);
+          this.alertService.error(this.strings.error.exportPDF);
         },
       );
   }
 
   openManualDialog(): void {
-    this.dialog.open(ManualComponent);
+    this.configService.getPromptHtml('gettingStarted').subscribe((html) => {
+      this.dialog.open(ManualComponent, {
+        data: {
+          content: html,
+        },
+      });
+    });
   }
 
-  onDarkModeSwitched({ checked }: MatSlideToggleChange): void {
-    this.darkModeSwitched.emit(checked);
+  openSettingsDialog(): void {
+    const dialogRef = this.dialog.open(SettingsComponent);
+
+    dialogRef.componentInstance.darkModeSwitched.subscribe((checked: boolean) => {
+      this.darkModeSwitched.emit(checked);
+    });
   }
 }

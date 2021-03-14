@@ -1,53 +1,63 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { SearchArgument, SearchResult } from '../../@core/services/search/search.model';
-import { AlertService } from 'src/app/@core/services/alertsnackbar/altersnackbar.service';
-import Logger from 'src/app/@core/utils/logger';
 import { Observable } from 'rxjs';
+
+import { SearchArgument, SearchResult } from '../../@core/services/search/search.model';
+import { AlertService } from '../../@core/services/alertsnackbar/altersnackbar.service';
+import { GlobalModel } from '../../@core/models/global.model';
+import { LocalizedStrings } from '../../@core/services/i18n/i18n.service';
+import Logger from '../../@core/utils/logger';
 import { SearchService } from '../../@core/services/search/search.service';
 
 const logger = new Logger('search-dialog');
 
-import { strings } from '../../../assets/strings.json';
-
 @Component({
   selector: 'app-search-dialog',
   templateUrl: './search-dialog.component.html',
-  styleUrls: ['./search-dialog.component.scss']
+  styleUrls: ['./search-dialog.component.scss'],
 })
 export class SearchDialogComponent implements OnInit {
   searchResults: SearchResult[] = [];
   searchFinished = false;
+  searchFailed = false;
   exactSearch = false;
   subscription: Observable<SearchResult[]> | undefined;
   selected: SearchResult | undefined;
 
-  strings = strings;
+  strings!: LocalizedStrings;
 
   constructor(
     public dialogRef: MatDialogRef<SearchDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { arguments: SearchArgument[]; results: SearchResult[] },
+    @Inject(MAT_DIALOG_DATA) public data: { arguments: SearchArgument[] },
+
+    private globals: GlobalModel,
     private searchService: SearchService,
     private alertService: AlertService,
   ) {
+    this.globals.localizedStringsObservable.subscribe((strings) => (this.strings = strings));
   }
 
   ngOnInit(): void {
-    this.subscription = this.searchService.search({
+    this.subscription = this.searchService.search('gestis', {
       arguments: this.data.arguments,
       exact: this.exactSearch,
     });
 
     this.searchResults = [];
     this.searchFinished = false;
-    this.subscription.subscribe((response) => {
-      this.searchResults = response;
-      this.searchFinished = true;
-    },
+    this.searchFailed = false;
+    this.subscription.subscribe(
+      (response) => {
+        this.searchResults = response;
+        this.searchFinished = true;
+      },
       (err) => {
+        this.searchFinished = true;
+        this.searchFailed = true;
         logger.error('loading search results failed:', err);
-        this.alertService.error(strings.error.loadSearchResults);
-      });
+        this.alertService.error(this.strings.error.loadSearchResults);
+      },
+    );
   }
 
   setSelected(selected: SearchResult): void {

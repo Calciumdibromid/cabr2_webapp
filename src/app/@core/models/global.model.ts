@@ -1,12 +1,19 @@
 import { BehaviorSubject } from 'rxjs';
-import { Header } from '../interfaces/Header';
 import { Injectable } from '@angular/core';
+
+import { I18nService, LocalizedStrings } from '../services/i18n/i18n.service';
+import { Header } from '../interfaces/Header';
 import { SearchResult } from '../services/search/search.model';
 import { SubstanceData } from '../services/substances/substances.model';
 
 @Injectable()
 export class GlobalModel {
-  header: Header = {
+  ghsSymbols: GHSSymbols = new Map();
+
+  localizedStringsSubject = new BehaviorSubject<LocalizedStrings>(I18nService.getDefaultStrings());
+  localizedStringsObservable = this.localizedStringsSubject.asObservable();
+
+  headerSubject = new BehaviorSubject<Header>({
     assistant: '',
     documentTitle: '',
     labCourse: '',
@@ -14,35 +21,7 @@ export class GlobalModel {
     organisation: '',
     place: '',
     preparation: '',
-  };
-
-  searchResults: SearchResult[] = [];
-
-  substanceData: SubstanceData[] = [];
-
-  humanAndEnvironmentDanger: string[] = [];
-
-  rulesOfConduct: string[] = [];
-
-  inCaseOfDanger: string[] = [];
-
-  disposal: string[] = [];
-
-  ghsSymbols: GHSSymbols = new Map();
-
-  // new shit
-
-  headerSubject = new BehaviorSubject<Header>(
-    {
-      assistant: '',
-      documentTitle: '',
-      labCourse: '',
-      name: '',
-      organisation: '',
-      place: '',
-      preparation: '',
-    }
-  );
+  });
   headerObservable = this.headerSubject.asObservable();
 
   searchResultSubject = new BehaviorSubject<SearchResult[]>([]);

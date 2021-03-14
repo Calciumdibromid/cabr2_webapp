@@ -1,20 +1,21 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { first } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { SearchDialogComponent } from './search-dialog/search-dialog.component';
 
 import { Data, Source, SubstanceData } from '../@core/services/substances/substances.model';
 import { AlertService } from '../@core/services/alertsnackbar/altersnackbar.service';
-import { EditSearchResultsComponent } from './edit-search-results/edit-search-results.component';
 import { GlobalModel } from '../@core/models/global.model';
+import { LocalizedStrings } from '../@core/services/i18n/i18n.service';
 import Logger from '../@core/utils/logger';
 import { SearchArgument } from '../@core/services/search/search.model';
-import { SelectedSearchComponent } from './selected-search/selected-search.component';
 import { SubstancesService } from '../@core/services/substances/substances.service';
 import { TauriService } from '../@core/services/tauri/tauri.service';
 
-import { strings } from '../../assets/strings.json';
+import { EditSearchResultsComponent } from './edit-search-results/edit-search-results.component';
+import { SearchDialogComponent } from './search-dialog/search-dialog.component';
+import { SelectedSearchComponent } from './selected-search/selected-search.component';
 
 const logger = new Logger('search');
 
@@ -32,7 +33,7 @@ export class SearchComponent implements OnInit {
   res: SearchArgument[] = [];
   control = new FormControl();
 
-  strings = strings;
+  strings!: LocalizedStrings;
 
   substanceData: SubstanceData[] = [];
 
@@ -46,7 +47,9 @@ export class SearchComponent implements OnInit {
     private alertService: AlertService,
     private dialog: MatDialog,
     public globals: GlobalModel,
-  ) { }
+  ) {
+    this.globals.localizedStringsObservable.subscribe((strings) => (this.strings = strings));
+  }
 
   ngOnInit(): void {
     this.globals.substanceDataObservable.subscribe((data) => {
@@ -58,7 +61,6 @@ export class SearchComponent implements OnInit {
     const dialogRef = this.dialog.open(SearchDialogComponent, {
       data: {
         arguments: this.selectedSearch?.onSubmit(),
-        results: this.globals.searchResults,
       },
       maxWidth: 1500,
       minWidth: 800,
@@ -69,26 +71,28 @@ export class SearchComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.substanceService
-          .substanceInfo(result.zvgNumber)
-          .subscribe((value) => {
+        this.substanceService.substanceInfo('gestis', result.zvgNumber).subscribe(
+          (value) => {
             const cas = this.modifiedOrOriginal(value.cas);
             if (
-              cas && this.globals.substanceDataSubject.getValue().some(s => cas === this.modifiedOrOriginal(s.cas))
+              cas &&
+              this.globals.substanceDataSubject.getValue().some((s) => cas === this.modifiedOrOriginal(s.cas))
             ) {
               logger.warning('substance with same cas number already present:', cas);
-              this.alertService.error(strings.error.substanceWithCASExist);
+              this.alertService.error(this.strings.error.substanceWithCASExist);
               return;
             }
             const data = [...this.globals.substanceDataSubject.getValue(), value];
             this.dataSource.connect().next(data);
             this.globals.substanceDataSubject.next(data);
-
           },
-            (err) => {
-              logger.error('could not get substance information:', err);
-              this.alertService.error(strings.error.substanceLoadData);
-            });
+          (err) => {
+            logger.error('could not get substance information:', err);
+            this.alertService.error(this.strings.error.substanceLoadData);
+          },
+        );
+
+        this.selectedSearch?.clear();
       }
     });
   }
@@ -103,31 +107,33 @@ export class SearchComponent implements OnInit {
         minHeight: 300,
       })
       .afterClosed()
-      .subscribe((substanceData?: SubstanceData) => {
-        // substanceData is only filled if editing was successful
-        if (substanceData) {
-          const newData = this.globals.substanceDataSubject.getValue();
-          const index = newData.indexOf(origData);
-          newData[index] = substanceData;
-          this.globals.substanceDataSubject.next(newData);
-        }
-      },
+      .subscribe(
+        (substanceData?: SubstanceData) => {
+          // substanceData is only filled if editing was successful
+          if (substanceData) {
+            const newData = this.globals.substanceDataSubject.getValue();
+            const index = newData.indexOf(origData);
+            newData[index] = substanceData;
+            this.globals.substanceDataSubject.next(newData);
+          }
+        },
         (err) => {
           logger.error('editing substance failed:', err);
-          this.alertService.error(strings.error.editSubstance);
-        });
+          this.alertService.error(this.strings.error.editSubstance);
+        },
+      );
   }
 
   removeSubstance(event: MouseEvent, data: SubstanceData): void {
     event.preventDefault();
     event.stopPropagation();
 
-    this.globals.substanceDataObservable
-      .subscribe((value) => {
-        const index = value.indexOf(data);
-        value.splice(index, 1);
-        this.dataSource.connect().next(value);
-      });
+    this.globals.substanceDataObservable.pipe(first()).subscribe((value) => {
+      const index = value.indexOf(data);
+      value.splice(index, 1);
+      this.globals.substanceDataSubject.next(value);
+      this.dataSource.connect().next(value);
+    });
   }
 
   userUrlAvailable(source: Source): boolean {
