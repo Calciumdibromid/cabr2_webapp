@@ -1,11 +1,5 @@
 use warp::Filter;
 
-#[cfg(debug_assertions)]
-const ADDRESS: ([u8; 4], u16) = ([127, 0, 0, 1], 3030);
-
-#[cfg(not(debug_assertions))]
-const ADDRESS: ([u8; 4], u16) = ([0, 0, 0, 0], 80);
-
 #[tokio::main]
 async fn main() {
   // must be initialized first
@@ -40,18 +34,24 @@ async fn main() {
         .and_then(cabr2_search::handle_substances),
     );
 
+  let cors;
+  let address;
   #[cfg(not(debug_assertions))]
-  let cors = warp::cors()
-    .allow_origin("http://app.cabr2.de")
-    .allow_methods(vec!["POST"])
-    .allow_headers(vec!["content-type"]);
-
+  {
+    cors = warp::cors()
+      .allow_origin("http://app.cabr2.de")
+      .allow_methods(vec!["POST"])
+      .allow_headers(vec!["content-type"]);
+    address = ([0, 0, 0, 0], 80);
+  }
   #[cfg(debug_assertions)]
-  let cors = warp::cors()
-    .allow_origin("http://localhost:4200")
-    .allow_methods(vec!["POST"])
-    .allow_headers(vec!["content-type"]);
-
+  {
+    cors = warp::cors()
+      .allow_origin("http://localhost:4200")
+      .allow_methods(vec!["POST"])
+      .allow_headers(vec!["content-type"]);
+    address = ([127, 0, 0, 1], 3030);
+  }
   let routes = search_paths.with(cors);
   // allow cors on everything
   // let routes = routes.with(warp::cors().allow_any_origin());
@@ -61,5 +61,5 @@ async fn main() {
   log::info!("server starting...");
   // On debug builds it runs on `http://localhost:3030`,
   // on release builds it runs on port 80 and listens on every interface.
-  warp::serve(routes).run(ADDRESS).await;
+  warp::serve(routes).run(address).await;
 }

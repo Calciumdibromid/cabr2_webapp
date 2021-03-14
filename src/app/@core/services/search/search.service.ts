@@ -1,10 +1,10 @@
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { GlobalModel } from '../../models/global.model';
 
 import { SearchArguments, SearchResult, SearchType, SearchTypeMapping, searchTypes } from './search.model';
-import { from } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class SearchService {
   searchTypeMappingsSubject = new BehaviorSubject<SearchTypeMapping[]>([]);
   searchTypeMappingsObservable = this.searchTypeMappingsSubject.asObservable();
 
-  constructor(private globals: GlobalModel) {
+  constructor(private httpClient: HttpClient, private globals: GlobalModel) {
     this.globals.localizedStringsObservable.subscribe((strings) =>
       this.searchTypeMappingsSubject.next(searchTypes.map((t) => ({ viewValue: strings.search.types[t], value: t }))),
     );
@@ -33,13 +33,10 @@ export class SearchService {
    * ```
    */
   searchSuggestions(provider: string, searchType: SearchType, query: string): Observable<string[]> {
-    return from(fetch('http://127.0.0.1:3030/api/v1/search/suggestions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ provider, searchArgument: { searchType, pattern: query } })
-    }) as unknown as Promise<string[]>);
+    return this.httpClient.post<string[]>('http://127.0.0.1:3030/api/v1/search/suggestions', {
+      provider,
+      searchArgument: { searchType, pattern: query },
+    });
   }
 
   /**
@@ -62,12 +59,9 @@ export class SearchService {
    * ```
    */
   search(provider: string, args: SearchArguments): Observable<SearchResult[]> {
-    return from(fetch('http://127.0.0.1:3030/api/v1/search/results', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ provider, searchArguments: args })
-    }) as unknown as Promise<SearchResult[]>);
+    return this.httpClient.post<SearchResult[]>('http://127.0.0.1:3030/api/v1/search/results', {
+      provider,
+      searchArguments: args,
+    });
   }
 }
