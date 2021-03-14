@@ -8,14 +8,5 @@ fn main() {
   let load_save = cabr2_load_save::LoadSave::new();
   let search = cabr2_search::Search::new();
 
-  log::debug!("initializing tauri application...");
-
-  tauri::AppBuilder::new()
-    .plugin(config)
-    .plugin(load_save)
-    .plugin(logger)
-    .plugin(search)
-    .setup(|_, s| log::debug!("tauri setup complete ({})", s))
-    .build()
-    .run();
+  log::info!("server starting...");
 }

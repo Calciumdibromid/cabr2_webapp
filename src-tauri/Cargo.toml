@@ -1,7 +1,6 @@
 [package]
-name = "cabr2"
+name = "cabr2_server"
 version = "0.1.0"
-description = 'Generate "experiment wise safety sheets" in compliance to European law.'
 authors = [
   "Epsilon_02 <epsilon_02@mailbox.org>",
   "crapStone <crapstone01@gmail.com>",
@@ -9,16 +8,8 @@ authors = [
 ]
 license = "GPLv3+"
 repository = "https://github.com/Calciumdibromid/CaBr2/"
-default-run = "cabr2"
+default-run = "cabr2_server"
 edition = "2018"
-build = "src/build.rs"
-
-[package.metadata.bundle]
-name = "Calciumdibromid"
-identifier = "de.cabr2"
-icon = [ "32x32.png", "128x128.png", "128x128@2x.png" ]
-category = "Education"
-resources = [ "ghs_symbols/*.png" ]
 
 [dependencies]
 cabr2_config = { path = "./cabr2_config/" }
@@ -26,25 +17,13 @@ cabr2_load_save = { path = "./cabr2_load_save/" }
 cabr2_logger = { path = "./cabr2_logger/" }
 cabr2_search = { path = "./cabr2_search/" }
 log = "0.4.14"
-tauri = { version = "0.11", features = [
-  "event",
-  "notification",
-  "open-dialog",
-  "open",
-  "save-dialog"
-] }
-
-[target."cfg(windows)".build-dependencies]
-winres = "0.1"
 
 [features]
-embedded-server = [ "tauri/embedded-server" ]
-no-server = [ "tauri/no-server" ]
 portable = [ "cabr2_config/portable" ]
 default = [ "portable" ]
 
 [[bin]]
-name = "cabr2"
+name = "cabr2_server"
 path = "src/main.rs"
 
 [workspace]

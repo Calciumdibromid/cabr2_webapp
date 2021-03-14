@@ -1,18 +1,12 @@
 #![allow(clippy::new_without_default)]
 
-mod cmd;
-
 use std::fs;
 
 use fern::Dispatch;
 use log::LevelFilter;
-use serde_json::{to_string_pretty, Value};
-use tauri::plugin::Plugin;
 
 use cabr2_config::{read_config, BackendConfig, TMP_DIR};
 use cabr2_types::logging::LogLevel;
-
-use cmd::Cmd;
 
 pub struct Logger;
 
@@ -58,30 +52,6 @@ impl Logger {
     log::info!("log file: {:?}", log_file);
     Ok(())
   }
-
-  fn handle(&self, level: LogLevel, path: String, messages: Vec<Value>) -> Result<(), String> {
-    let mut formatted_messages = Vec::with_capacity(messages.len());
-    for message in messages {
-      match message {
-        Value::String(s) => formatted_messages.push(s),
-        _ => match to_string_pretty(&message) {
-          Ok(formatted) => formatted_messages.push(formatted),
-          Err(e) => return Err(e.to_string()),
-        },
-      }
-    }
-
-    let print_message = formatted_messages.join(" ");
-    match level {
-      LogLevel::TRACE => log::trace!("[{}] {}", path, print_message),
-      LogLevel::DEBUG => log::debug!("[{}] {}", path, print_message),
-      LogLevel::INFO => log::info!("[{}] {}", path, print_message),
-      LogLevel::WARNING => log::warn!("[{}] {}", path, print_message),
-      LogLevel::ERROR => log::error!("[{}] {}", path, print_message),
-    }
-
-    Ok(())
-  }
 }
 
 /// Converts an `Option<LogLevel>` into `LevelFilter`.
@@ -90,27 +60,5 @@ fn convert_level(level: Option<LogLevel>) -> LevelFilter {
   match level {
     Some(level) => level.into(),
     None => LevelFilter::Error,
-  }
-}
-
-impl Plugin for Logger {
-  fn extend_api(&self, _: &mut tauri::Webview, payload: &str) -> Result<bool, String> {
-    match serde_json::from_str(payload) {
-      Err(e) => Err(e.to_string()),
-      Ok(command) => {
-        match command {
-          Cmd::Log { level, path, messages } => self.handle(level, path, messages)?,
-        }
-        Ok(true)
-      }
-    }
-  }
-
-  fn created(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin created");
-  }
-
-  fn ready(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin ready");
   }
 }
