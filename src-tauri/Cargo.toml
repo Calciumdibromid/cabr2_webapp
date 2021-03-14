@@ -17,6 +17,9 @@ cabr2_load_save = { path = "./cabr2_load_save/" }
 cabr2_logger = { path = "./cabr2_logger/" }
 cabr2_search = { path = "./cabr2_search/" }
 log = "0.4.14"
+serde = { version = "1.0.124", features = ["derive"] }
+tokio = { version = "1.3.0", features = ["macros", "rt-multi-thread"] }
+warp = "0.3.0"
 
 [features]
 portable = [ "cabr2_config/portable" ]

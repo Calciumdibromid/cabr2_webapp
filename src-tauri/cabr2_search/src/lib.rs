@@ -7,6 +7,14 @@ mod types;
 
 mod gestis;
 
+use std::convert::Infallible;
+
+use serde::Deserialize;
+use serde_json::Value;
+use warp::{hyper::StatusCode, Reply};
+
+use types::{SearchArgument, SearchArguments};
+
 pub struct Search;
 
 impl Search {
@@ -15,5 +23,59 @@ impl Search {
     providers.insert("gestis", Box::new(gestis::Gestis::new()));
 
     Search
+  }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SuggenstionBody {
+  provider: String,
+  search_argument: SearchArgument,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResultBody {
+  provider: String,
+  search_arguments: SearchArguments,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SubstanceBody {
+  provider: String,
+  identifier: String,
+}
+
+pub async fn handle_suggestions(body: SuggenstionBody) -> Result<impl Reply, Infallible> {
+  match handler::get_quick_search_suggestions(
+    body.provider,
+    body.search_argument.search_type,
+    body.search_argument.pattern,
+  ) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
+pub async fn handle_results(body: ResultBody) -> Result<impl Reply, Infallible> {
+  match handler::get_search_results(body.provider, body.search_arguments) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
+pub async fn handle_substances(body: SubstanceBody) -> Result<impl Reply, Infallible> {
+  match handler::get_substance_data(body.provider, body.identifier) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
   }
 }

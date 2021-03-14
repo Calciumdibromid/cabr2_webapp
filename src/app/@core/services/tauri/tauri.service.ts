@@ -1,25 +1,30 @@
-import { from, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
-import * as dialog from 'tauri/api/dialog';
-import * as tauri from 'tauri/api/tauri';
-import { open as tauriOpen } from 'tauri/api/window';
+import Logger from '../../utils/logger';
+
+const logger = new Logger('service.tauri');
+
+const logCall = (name: string) => logger.error('called inaccessible tauri service: [', name, ']');
 
 @Injectable({
   providedIn: 'root',
 })
 export class TauriService {
-  openUrl = tauriOpen;
+  openUrl = window.open;
 
-  open(options?: dialog.OpenDialogOptions): Observable<string | string[]> {
-    return from(dialog.open(options));
+  open(options?: any): Observable<string | string[]> {
+    logCall('open');
+    return new Observable();
   }
 
-  save(options?: dialog.SaveDialogOptions): Observable<string | string[]> {
-    return from(dialog.save(options));
+  save(options?: any): Observable<string | string[]> {
+    logCall('save');
+    return new Observable();
   }
 
   promisified<T>(args: any): Observable<T> {
-    return from(tauri.promisified<T>(args));
+    logCall('promisified');
+    return new Observable();
   }
 }

@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { EditSearchResultsComponent } from './search/edit-search-results/edit-search-results.component';
 import { GlobalModel } from './@core/models/global.model';
 import { HeaderComponent } from './header/header.component';
+import { HttpClientModule } from '@angular/common/http';
 import { ManualComponent } from './manual/manual.component';
 import { MatModules } from './@core/modules/mat.modules';
 import { MenubarComponent } from './menubar/menubar.component';
@@ -38,7 +39,15 @@ import { YesNoDialogComponent } from './yes-no-dialog/yes-no-dialog.component';
     ReportBugComponent,
     SubMolecularFormula,
   ],
-  imports: [BrowserModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, MatModules, AlertModule],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
+    MatModules,
+    AlertModule,
+  ],
   providers: [GlobalModel],
   bootstrap: [AppComponent],
 })
