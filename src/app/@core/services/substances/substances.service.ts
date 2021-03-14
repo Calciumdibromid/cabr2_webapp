@@ -7,7 +7,7 @@ import { SubstanceData } from './substances.model';
   providedIn: 'root',
 })
 export class SubstancesService {
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   substanceInfo(provider: string, identifier: string): Observable<SubstanceData> {
     return this.httpClient.post<SubstanceData>('http://127.0.0.1:3030/api/v1/search/substances', {
