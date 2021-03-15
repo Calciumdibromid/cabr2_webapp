@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 import { GlobalModel } from '../../models/global.model';
 
 import { SearchArguments, SearchResult, SearchType, SearchTypeMapping, searchTypes } from './search.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +34,7 @@ export class SearchService {
    * ```
    */
   searchSuggestions(provider: string, searchType: SearchType, query: string): Observable<string[]> {
-    return this.httpClient.post<string[]>('http://127.0.0.1:3030/api/v1/search/suggestions', {
+    return this.httpClient.post<string[]>(environment.baseUrl + 'search/suggestions', {
       provider,
       searchArgument: { searchType, pattern: query },
     });
@@ -59,7 +60,7 @@ export class SearchService {
    * ```
    */
   search(provider: string, args: SearchArguments): Observable<SearchResult[]> {
-    return this.httpClient.post<SearchResult[]>('http://127.0.0.1:3030/api/v1/search/results', {
+    return this.httpClient.post<SearchResult[]>(environment.baseUrl + 'search/results', {
       provider,
       searchArguments: args,
     });

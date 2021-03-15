@@ -1,17 +1,19 @@
-import { ConfigModel } from '../../models/config.model';
-import { GHSSymbols } from '../../models/global.model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
+import { ConfigModel } from '../../models/config.model';
+import { environment } from '../../../../environments/environment';
+import { GHSSymbols } from '../../models/global.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConfigService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
 
   getProgramVersion(): Observable<string> {
-    return this.httpClient.get<string>('http://127.0.0.1:3030/api/v1/config/programVersion');
+    return this.httpClient.get<string>(environment.baseUrl + 'config/programVersion');
   }
 
   getConfig(): Observable<ConfigModel> {
@@ -31,11 +33,11 @@ export class ConfigService {
   }
 
   getHazardSymbols(): Observable<GHSSymbols> {
-    return this.httpClient.get<GHSSymbols>('http://127.0.0.1:3030/api/v1/config/hazardSymbols');
+    return this.httpClient.get<GHSSymbols>(environment.baseUrl + 'config/hazardSymbols');
   }
 
   getPromptHtml(name: string): Observable<string> {
-    return this.httpClient.post<string>('http://127.0.0.1:3030/api/v1/config/promptHtml', {
+    return this.httpClient.post<string>(environment.baseUrl + 'config/promptHtml', {
       name,
     });
   }

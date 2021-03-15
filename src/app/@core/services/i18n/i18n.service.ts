@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { strings as DEFAULT_STRINGS } from '../../../../assets/defaultStrings.json';
+import { environment } from '../../../../environments/environment';
 import Logger from '../../utils/logger';
 
 const logger = new Logger('i18n-service');
@@ -13,20 +14,20 @@ export type LocalizedStrings = typeof DEFAULT_STRINGS;
   providedIn: 'root',
 })
 export class I18nService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
 
   static getDefaultStrings(): LocalizedStrings {
     return DEFAULT_STRINGS;
   }
 
   getAvailableLanguages(): Observable<LocalizedStringsHeader[]> {
-    return this.httpClient.get<LocalizedStringsHeader[]>('http://127.0.0.1:3030/api/v1/config/availableLanguages');
+    return this.httpClient.get<LocalizedStringsHeader[]>(environment.baseUrl + 'config/availableLanguages');
   }
 
   getLocalizedStrings(language: string): Observable<LocalizedStrings> {
     return new Observable((sub) => {
       this.httpClient
-        .post<LocalizedStrings>('http://127.0.0.1:3030/api/v1/config/localizedStrings', {
+        .post<LocalizedStrings>(environment.baseUrl + 'config/localizedStrings', {
           language,
         })
         .subscribe(

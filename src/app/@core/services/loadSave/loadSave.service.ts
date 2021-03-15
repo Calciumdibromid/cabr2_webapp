@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { CaBr2Document, DocumentTypes } from './loadSave.model';
+import { environment } from '../../../../environments/environment';
 import Logger from '../../utils/logger';
 
 const logger = new Logger('service.loadSave');
@@ -30,7 +31,7 @@ export class LoadSaveService {
       case 'pdf':
         // TODO downloadlink
         return new Observable((sub) => {
-          this.httpClient.post<SaveDocumentResponse>('http://127.0.0.1:3030/api/v1/loadSave/saveDocument', {
+          this.httpClient.post<SaveDocumentResponse>(environment.baseUrl + 'loadSave/saveDocument', {
             fileType,
             document: doc,
           }).pipe(first()).subscribe(
@@ -63,7 +64,7 @@ export class LoadSaveService {
         return new Observable((sub) => {
           reader.onload = () => {
             this.httpClient
-              .post<CaBr2Document>('http://127.0.0.1:3030/api/v1/loadSave/loadDocument', {
+              .post<CaBr2Document>(environment.baseUrl + 'loadSave/loadDocument', {
                 fileType,
                 document: reader.result,
               })
@@ -82,7 +83,7 @@ export class LoadSaveService {
   }
 
   getAvailableDocumentTypes(): Observable<DocumentTypes> {
-    // return this.httpClient.get<DocumentTypes>('http://127.0.0.1:3030/api/v1/loadSave/availableDocumentTypes');
+    // return this.httpClient.get<DocumentTypes>(environment.baseUrl + 'loadSave/availableDocumentTypes');
     return new Observable((sub) => sub.next({ load: ['cb2', 'be'], save: ['cb2', 'pdf'] }));
   }
 }
