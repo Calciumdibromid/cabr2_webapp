@@ -2,6 +2,8 @@ use std::fs;
 
 use warp::Filter;
 
+use cabr2_load_save::{CACHE_FOLDER, DOWNLOAD_FOLDER};
+
 #[tokio::main]
 async fn main() {
   // all "cabr2-services" start with a underscore, because we don't use them, but their member variables are needed.
@@ -15,8 +17,8 @@ async fn main() {
   let _search = cabr2_search::Search::new();
 
   // create tmp folders
-  fs::create_dir_all("/tmp/cabr2_server/created").unwrap();
-  fs::create_dir("/tmp/cabr2_server/cache").unwrap();
+  fs::create_dir_all(DOWNLOAD_FOLDER).unwrap();
+  fs::create_dir(CACHE_FOLDER).unwrap();
 
   let search_suggestions = warp::path("suggestions")
     .and(warp::post())
@@ -92,6 +94,8 @@ async fn main() {
       .or(load_save_save_document),
   );
 
+  let downloads_folder = warp::path("download").and(warp::fs::dir(DOWNLOAD_FOLDER));
+
   let cors;
   let address;
   #[cfg(not(debug_assertions))]
@@ -112,7 +116,7 @@ async fn main() {
   }
 
   let api = warp::path("api").and(warp::path("v1"));
-  let routes = api.and(search.or(config.or(load_save))).with(cors);
+  let routes = api.and(search.or(config.or(load_save))).with(cors).or(downloads_folder);
 
   /*
   /api/v1/..

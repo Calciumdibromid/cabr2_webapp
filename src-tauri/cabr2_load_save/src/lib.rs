@@ -19,6 +19,9 @@ use warp::{hyper::StatusCode, Reply};
 
 use types::CaBr2Document;
 
+pub const DOWNLOAD_FOLDER: &str = "/tmp/cabr2_server/created";
+pub const CACHE_FOLDER: &str = "/tmp/cabr2_server/cache";
+
 pub struct LoadSave;
 
 impl LoadSave {
@@ -54,7 +57,7 @@ pub struct LoadDocumentBody {
 
 pub async fn handle_load_document(body: LoadDocumentBody) -> Result<impl Reply, Infallible> {
   lazy_static! {
-    static ref TMP: PathBuf = PathBuf::from("/tmp/cabr2_server/cache");
+    static ref TMP: PathBuf = PathBuf::from(CACHE_FOLDER);
   }
 
   let mut path;
@@ -102,7 +105,7 @@ struct SaveDocumentResponse {
 
 pub async fn handle_save_document(body: SaveDocumentBody) -> Result<impl Reply, Infallible> {
   lazy_static! {
-    static ref TMP: PathBuf = PathBuf::from("/tmp/cabr2_server/created");
+    static ref TMP: PathBuf = PathBuf::from(DOWNLOAD_FOLDER);
   }
 
   let mut path;
