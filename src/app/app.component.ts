@@ -68,7 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
       // skip initial config and first load
       configObservable
         .pipe(
-          skip(2),
+          skip(1),
           switchMap((config) => this.configService.saveConfig(config).pipe(first())),
         )
         .subscribe(
