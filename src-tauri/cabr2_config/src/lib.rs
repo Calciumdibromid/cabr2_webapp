@@ -14,7 +14,7 @@ use warp::{hyper::StatusCode, Reply};
 
 pub struct Config;
 
-pub async fn handle_hazardSymbols() -> Result<impl Reply, Infallible> {
+pub async fn handle_hazard_symbols() -> Result<impl Reply, Infallible> {
   match handler::get_hazard_symbols() {
     Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
     Err(err) => Ok(warp::reply::with_status(
@@ -36,7 +36,7 @@ pub struct PromptHtmlBody {
   name: String,
 }
 
-pub async fn handle_promptHtml(body: PromptHtmlBody) -> Result<impl Reply, Infallible> {
+pub async fn handle_prompt_html(body: PromptHtmlBody) -> Result<impl Reply, Infallible> {
   match handler::get_prompt_html(body.name) {
     Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
     Err(err) => Ok(warp::reply::with_status(
@@ -46,7 +46,7 @@ pub async fn handle_promptHtml(body: PromptHtmlBody) -> Result<impl Reply, Infal
   }
 }
 
-pub async fn handle_availableLanguages() -> Result<impl Reply, Infallible> {
+pub async fn handle_available_languages() -> Result<impl Reply, Infallible> {
   match handler::get_available_languages() {
     Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
     Err(err) => Ok(warp::reply::with_status(
@@ -61,7 +61,7 @@ pub struct LocalizedStringsBody {
   language: String,
 }
 
-pub async fn handle_localizedStrings(body: LocalizedStringsBody) -> Result<impl Reply, Infallible> {
+pub async fn handle_localized_strings(body: LocalizedStringsBody) -> Result<impl Reply, Infallible> {
   match handler::get_localized_strings(body.language) {
     Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
     Err(err) => Ok(warp::reply::with_status(

@@ -1,13 +1,22 @@
+use std::fs;
+
 use warp::Filter;
 
 #[tokio::main]
 async fn main() {
+  // all "cabr2-services" start with a underscore, because we don't use them, but their member variables are needed.
+  // Because of the `.await` in the last line of this function they will never be deallocated.
+
   // must be initialized first
   let _logger = cabr2_logger::Logger::new();
 
   let _config = cabr2_config::Config;
   let _load_save = cabr2_load_save::LoadSave::new();
   let _search = cabr2_search::Search::new();
+
+  // create tmp folders
+  fs::create_dir_all("/tmp/cabr2_server/created").unwrap();
+  fs::create_dir("/tmp/cabr2_server/cache").unwrap();
 
   let search_suggestions = warp::path("suggestions")
     .and(warp::post())
@@ -33,39 +42,55 @@ async fn main() {
     .and(warp::get())
     .and_then(cabr2_config::handle_program_version);
 
-  let config_hazardSymbols = warp::path("hazardSymbols")
+  let config_hazard_symbols = warp::path("hazardSymbols")
     .and(warp::path::end())
     .and(warp::get())
-    .and_then(cabr2_config::handle_hazardSymbols);
+    .and_then(cabr2_config::handle_hazard_symbols);
 
-  let config_promptHtml = warp::path("promptHtml")
+  let config_prompt_html = warp::path("promptHtml")
     .and(warp::path::end())
     .and(warp::post())
     .and(warp::body::json())
-    .and_then(cabr2_config::handle_promptHtml);
+    .and_then(cabr2_config::handle_prompt_html);
 
-  let config_availableLanguages = warp::path("availableLanguages")
+  let config_available_languages = warp::path("availableLanguages")
     .and(warp::path::end())
     .and(warp::get())
-    .and_then(cabr2_config::handle_availableLanguages);
+    .and_then(cabr2_config::handle_available_languages);
 
-  let config_localizedStrings = warp::path("localizedStrings")
+  let config_localized_strings = warp::path("localizedStrings")
     .and(warp::path::end())
     .and(warp::post())
     .and(warp::body::json())
-    .and_then(cabr2_config::handle_localizedStrings);
+    .and_then(cabr2_config::handle_localized_strings);
 
   let config = warp::path("config").and(
     config_programversion
-      .or(config_hazardSymbols.or(config_promptHtml.or(config_availableLanguages.or(config_localizedStrings)))),
+      .or(config_hazard_symbols.or(config_prompt_html.or(config_available_languages.or(config_localized_strings)))),
   );
 
-  let loadSave_availableDocumentTypes = warp::path("availableDocumentTypes")
+  let load_save_available_document_types = warp::path("availableDocumentTypes")
     .and(warp::path::end())
     .and(warp::get())
-    .and_then(cabr2_load_save::handle_availableDocumentTypes);
+    .and_then(cabr2_load_save::handle_available_document_types);
 
-  let loadSave = warp::path("loadSave").and(loadSave_availableDocumentTypes);
+  let load_save_load_document = warp::path("loadDocument")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_load_save::handle_load_document);
+
+  let load_save_save_document = warp::path("saveDocument")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_load_save::handle_save_document);
+
+  let load_save = warp::path("loadSave").and(
+    load_save_available_document_types
+      .or(load_save_load_document)
+      .or(load_save_save_document),
+  );
 
   let cors;
   let address;
@@ -87,14 +112,14 @@ async fn main() {
   }
 
   let api = warp::path("api").and(warp::path("v1"));
-  let routes = api.and(search.or(config.or(loadSave))).with(cors);
+  let routes = api.and(search.or(config.or(load_save))).with(cors);
 
   /*
   /api/v1/..
 
-  POST ../search/suggestions { TODO }
-  POST ../search/results { TODO }
-  POST ../search/substances { TODO }
+  POST ../search/suggestions { provider, searchArgument: { searchType, pattern } }
+  POST ../search/results { provider, searchArguments: { exact, arguments: []{ searchType, pattern } } }
+  POST ../search/substances { provider, identifier }
 
   GET ../config/programVersion
   GET ../config/hazardSymbols
@@ -104,8 +129,8 @@ async fn main() {
   POST ../config/localizedStrings { language }
 
   GET ../loadSave/availableDocumentTypes
-  POST ../loadSave/saveDocument { fileType, document }
-  POST ../loadSave/loadDocument { fileType, binaryData }
+  POST ../loadSave/saveDocument { fileType, document } // document: CaBr2Document
+  POST ../loadSave/loadDocument { fileType, document } // document: String
   */
 
   // allow cors on everything
