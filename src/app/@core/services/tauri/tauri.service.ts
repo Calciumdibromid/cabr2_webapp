@@ -14,13 +14,24 @@ export class TauriService {
   openUrl = window.open;
 
   open(options?: any): Observable<string | string[]> {
-    logCall('open');
-    return new Observable();
+    return new Observable((sub) => {
+      const hiddenFileHack = document.getElementById('hiddenFileHack') as any;
+      hiddenFileHack?.addEventListener(
+        'change',
+        (e: any) => {
+          sub.next(e.target.files[0]);
+          hiddenFileHack.value = '';
+        },
+        { once: true },
+      );
+      hiddenFileHack?.click();
+    });
   }
 
   save(options?: any): Observable<string | string[]> {
-    logCall('save');
-    return new Observable();
+    return new Observable((sub) => {
+      sub.next(options.filter ?? 'be');
+    });
   }
 
   promisified<T>(args: any): Observable<T> {
