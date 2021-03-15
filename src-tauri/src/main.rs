@@ -58,7 +58,7 @@ async fn main() {
   {
     cors = warp::cors()
       .allow_origin("http://app.cabr2.de")
-      .allow_methods(vec!["POST"])
+      .allow_methods(vec!["GET", "POST"])
       .allow_headers(vec!["content-type"]);
     address = ([0, 0, 0, 0], 80);
   }
@@ -66,7 +66,7 @@ async fn main() {
   {
     cors = warp::cors()
       .allow_origin("http://localhost:4200")
-      .allow_methods(vec!["POST"])
+      .allow_methods(vec!["GET", "POST"])
       .allow_headers(vec!["content-type"]);
     address = ([127, 0, 0, 1], 3030);
   }
