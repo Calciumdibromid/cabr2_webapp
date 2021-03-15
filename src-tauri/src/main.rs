@@ -26,10 +26,7 @@ async fn main() {
     .and(warp::body::json())
     .and_then(cabr2_search::handle_substances);
 
-  let search = warp::path("search")
-    .and(search_suggestions)
-    .or(search_results)
-    .or(search_substances);
+  let search = warp::path("search").and(search_suggestions.or(search_results.or(search_substances)));
 
   let config_programversion = warp::path("programversion")
     .and(warp::path::end())
@@ -47,10 +44,7 @@ async fn main() {
     .and(warp::body::json())
     .and_then(cabr2_config::handle_promptHtml);
 
-  let config = warp::path("config")
-    .and(config_programversion)
-    .or(config_hazardSymbols)
-    .or(config_promptHtml);
+  let config = warp::path("config").and(config_programversion.or(config_hazardSymbols.or(config_promptHtml)));
 
   let cors;
   let address;
@@ -72,7 +66,7 @@ async fn main() {
   }
 
   let api = warp::path("api").and(warp::path("v1"));
-  let routes = api.and(search).or(config).with(cors);
+  let routes = api.and(search.or(config)).with(cors);
 
   // allow cors on everything
   // let routes = routes.with(warp::cors().allow_any_origin());
