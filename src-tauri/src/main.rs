@@ -28,7 +28,7 @@ async fn main() {
 
   let search = warp::path("search").and(search_suggestions.or(search_results.or(search_substances)));
 
-  let config_programversion = warp::path("programversion")
+  let config_programversion = warp::path("programVersion")
     .and(warp::path::end())
     .and(warp::get())
     .and_then(cabr2_config::handle_program_version);
