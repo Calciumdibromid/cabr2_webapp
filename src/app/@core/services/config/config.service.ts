@@ -10,7 +10,7 @@ import { GHSSymbols } from '../../models/global.model';
   providedIn: 'root',
 })
 export class ConfigService {
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   getProgramVersion(): Observable<string> {
     return this.httpClient.get<string>(environment.baseUrl + 'config/programVersion');

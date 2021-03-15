@@ -14,7 +14,7 @@ export type LocalizedStrings = typeof DEFAULT_STRINGS;
   providedIn: 'root',
 })
 export class I18nService {
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   static getDefaultStrings(): LocalizedStrings {
     return DEFAULT_STRINGS;

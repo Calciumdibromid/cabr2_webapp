@@ -9,7 +9,7 @@ import { SubstanceData } from './substances.model';
   providedIn: 'root',
 })
 export class SubstancesService {
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   substanceInfo(provider: string, identifier: string): Observable<SubstanceData> {
     return this.httpClient.post<SubstanceData>(environment.baseUrl + 'search/substances', {

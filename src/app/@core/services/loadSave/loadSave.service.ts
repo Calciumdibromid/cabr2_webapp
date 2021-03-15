@@ -13,7 +13,7 @@ const logger = new Logger('service.loadSave');
   providedIn: 'root',
 })
 export class LoadSaveService {
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
   saveDocument(fileType: string, filename: string, doc: CaBr2Document): Observable<string> {
     switch (fileType) {
@@ -31,16 +31,19 @@ export class LoadSaveService {
       case 'pdf':
         // TODO downloadlink
         return new Observable((sub) => {
-          this.httpClient.post<SaveDocumentResponse>(environment.baseUrl + 'loadSave/saveDocument', {
-            fileType,
-            document: doc,
-          }).pipe(first()).subscribe(
-            (res) => {
-              window.open(res.downloadUrl, 'Download');
-              sub.next('');
-            },
-            (err) => sub.error(err),
-          );
+          this.httpClient
+            .post<SaveDocumentResponse>(environment.baseUrl + 'loadSave/saveDocument', {
+              fileType,
+              document: doc,
+            })
+            .pipe(first())
+            .subscribe(
+              (res) => {
+                window.open(res.downloadUrl, 'Download');
+                sub.next('');
+              },
+              (err) => sub.error(err),
+            );
         });
 
       default:
