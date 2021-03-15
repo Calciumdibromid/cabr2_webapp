@@ -30,7 +30,7 @@ export class TauriService {
 
   save(options?: any): Observable<string | string[]> {
     return new Observable((sub) => {
-      sub.next(options.filter ?? 'be');
+      sub.next(options.filter ?? 'cb2');
     });
   }
 
