@@ -44,7 +44,21 @@ async fn main() {
     .and(warp::body::json())
     .and_then(cabr2_config::handle_promptHtml);
 
-  let config = warp::path("config").and(config_programversion.or(config_hazardSymbols.or(config_promptHtml)));
+  let config_availableLanguages = warp::path("availableLanguages")
+    .and(warp::path::end())
+    .and(warp::get())
+    .and_then(cabr2_config::handle_availableLanguages);
+
+  let config_localizedStrings = warp::path("localizedStrings")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_config::handle_localizedStrings);
+
+  let config = warp::path("config").and(
+    config_programversion
+      .or(config_hazardSymbols.or(config_promptHtml.or(config_availableLanguages.or(config_localizedStrings)))),
+  );
 
   let cors;
   let address;
