@@ -116,6 +116,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "toml",
+ "warp",
 ]
 
 [[package]]

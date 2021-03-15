@@ -9,30 +9,48 @@ async fn main() {
   let _load_save = cabr2_load_save::LoadSave::new();
   let _search = cabr2_search::Search::new();
 
-  let api = warp::path("api").and(warp::path("v1"));
-
-  let search = api.and(warp::path("search"));
-  let search_paths = search
-    .and(warp::path("suggestions"))
+  let search_suggestions = warp::path("suggestions")
     .and(warp::post())
     .and(warp::body::json())
-    .and_then(cabr2_search::handle_suggestions)
-    .or(
-      search
-        .and(warp::path("results"))
-        .and(warp::path::end())
-        .and(warp::post())
-        .and(warp::body::json())
-        .and_then(cabr2_search::handle_results),
-    )
-    .or(
-      search
-        .and(warp::path("substances"))
-        .and(warp::path::end())
-        .and(warp::post())
-        .and(warp::body::json())
-        .and_then(cabr2_search::handle_substances),
-    );
+    .and_then(cabr2_search::handle_suggestions);
+
+  let search_results = warp::path("results")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_search::handle_results);
+
+  let search_substances = warp::path("substances")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_search::handle_substances);
+
+  let search = warp::path("search")
+    .and(search_suggestions)
+    .or(search_results)
+    .or(search_substances);
+
+  let config_programversion = warp::path("programversion")
+    .and(warp::path::end())
+    .and(warp::get())
+    .and_then(cabr2_config::handle_program_version);
+
+  let config_hazardSymbols = warp::path("hazardSymbols")
+    .and(warp::path::end())
+    .and(warp::get())
+    .and_then(cabr2_config::handle_hazardSymbols);
+
+  let config_promptHtml = warp::path("promptHtml")
+    .and(warp::path::end())
+    .and(warp::post())
+    .and(warp::body::json())
+    .and_then(cabr2_config::handle_promptHtml);
+
+  let config = warp::path("config")
+    .and(config_programversion)
+    .or(config_hazardSymbols)
+    .or(config_promptHtml);
 
   let cors;
   let address;
@@ -52,7 +70,10 @@ async fn main() {
       .allow_headers(vec!["content-type"]);
     address = ([127, 0, 0, 1], 3030);
   }
-  let routes = search_paths.with(cors);
+
+  let api = warp::path("api").and(warp::path("v1"));
+  let routes = api.and(search).or(config).with(cors);
+
   // allow cors on everything
   // let routes = routes.with(warp::cors().allow_any_origin());
 
