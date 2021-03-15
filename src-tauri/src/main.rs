@@ -72,7 +72,7 @@ async fn main() {
   #[cfg(not(debug_assertions))]
   {
     cors = warp::cors()
-      .allow_origin("http://app.cabr2.de")
+      .allow_origin("https://app.cabr2.de")
       .allow_methods(vec!["GET", "POST"])
       .allow_headers(vec!["content-type"]);
     address = ([0, 0, 0, 0], 80);
