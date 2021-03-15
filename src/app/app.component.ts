@@ -109,7 +109,7 @@ export class AppComponent implements OnInit, OnDestroy {
     );
 
     // skip initial config only first load is needed
-    configObservable.pipe(skip(1), first()).subscribe((config) => {
+    configObservable.pipe(first()).subscribe((config) => {
       if (!config.globalSection.acceptedConsent) {
         this.dialog
           .open(ConsentComponent, {

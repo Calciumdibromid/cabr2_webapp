@@ -18,7 +18,12 @@ export class ConfigService {
 
   getConfig(): Observable<ConfigModel> {
     return new Observable((sub) => {
-      const cookie = JSON.parse(document.cookie);
+      let cookie;
+      try {
+        cookie = JSON.parse(document.cookie);
+      } catch (error) {
+        cookie = undefined;
+      }
       const config = new ConfigModel(cookie ? cookie.global : undefined);
       sub.next(config);
     });
