@@ -24,3 +24,4 @@ serde_json = "1.0.64"
 thiserror = "1.0.24"
 wkhtmltopdf = "0.3.0"
 warp = "0.3.0"
+uuid = { version = "0.8", features = ["serde", "v4"] }

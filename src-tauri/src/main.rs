@@ -89,6 +89,25 @@ async fn main() {
   let api = warp::path("api").and(warp::path("v1"));
   let routes = api.and(search.or(config.or(loadSave))).with(cors);
 
+  /*
+  /api/v1/..
+
+  POST ../search/suggestions { TODO }
+  POST ../search/results { TODO }
+  POST ../search/substances { TODO }
+
+  GET ../config/programVersion
+  GET ../config/hazardSymbols
+  POST ../config/promptHtml { name }
+
+  GET ../config/availableLanguages
+  POST ../config/localizedStrings { language }
+
+  GET ../loadSave/availableDocumentTypes
+  POST ../loadSave/saveDocument { fileType, document }
+  POST ../loadSave/loadDocument { fileType, binaryData }
+  */
+
   // allow cors on everything
   // let routes = routes.with(warp::cors().allow_any_origin());
 
