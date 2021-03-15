@@ -60,6 +60,13 @@ async fn main() {
       .or(config_hazardSymbols.or(config_promptHtml.or(config_availableLanguages.or(config_localizedStrings)))),
   );
 
+  let loadSave_availableDocumentTypes = warp::path("availableDocumentTypes")
+    .and(warp::path::end())
+    .and(warp::get())
+    .and_then(cabr2_load_save::handle_availableDocumentTypes);
+
+  let loadSave = warp::path("loadSave").and(loadSave_availableDocumentTypes);
+
   let cors;
   let address;
   #[cfg(not(debug_assertions))]
@@ -80,7 +87,7 @@ async fn main() {
   }
 
   let api = warp::path("api").and(warp::path("v1"));
-  let routes = api.and(search.or(config)).with(cors);
+  let routes = api.and(search.or(config.or(loadSave))).with(cors);
 
   // allow cors on everything
   // let routes = routes.with(warp::cors().allow_any_origin());
