@@ -124,7 +124,10 @@ pub async fn handle_save_document(body: SaveDocumentBody) -> Result<impl Reply, 
   let reply = match handler::save_document(body.file_type.clone(), path.clone(), body.document) {
     Ok(_) => Ok(warp::reply::with_status(
       warp::reply::json(&SaveDocumentResponse {
+        #[cfg(not(debug_assertions))]
         download_url: format!("https://api.cabr2.de/download/{}.{}", uuid_str, body.file_type),
+        #[cfg(debug_assertions)]
+        download_url: format!("http://localhost:3030/download/{}.{}", uuid_str, body.file_type),
       }),
       StatusCode::CREATED,
     )),

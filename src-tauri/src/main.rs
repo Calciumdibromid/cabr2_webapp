@@ -17,8 +17,8 @@ async fn main() {
   let _search = cabr2_search::Search::new();
 
   // create tmp folders
-  fs::create_dir_all(DOWNLOAD_FOLDER).unwrap();
-  fs::create_dir(CACHE_FOLDER).unwrap();
+  handle_result(fs::create_dir_all(DOWNLOAD_FOLDER));
+  handle_result(fs::create_dir(CACHE_FOLDER));
 
   let search_suggestions = warp::path("suggestions")
     .and(warp::post())
@@ -146,4 +146,16 @@ async fn main() {
   // On debug builds it runs on `http://localhost:3030`,
   // on release builds it runs on port 80 and listens on every interface.
   warp::serve(routes).run(address).await;
+}
+
+/// handles a directory creation result, if the folder was created or already existed
+/// everything is ok otherwise it logs the error and panics
+fn handle_result(res: std::io::Result<()>) {
+  res.unwrap_or_else(|err| match err.kind() {
+    std::io::ErrorKind::AlreadyExists => {}
+    _ => {
+      log::error!("{:?}", err);
+      panic!("")
+    }
+  });
 }

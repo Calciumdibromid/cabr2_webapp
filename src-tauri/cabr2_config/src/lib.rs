@@ -4,7 +4,6 @@ mod types;
 
 use std::convert::Infallible;
 
-use handler::get_localized_strings;
 pub use handler::{get_hazard_symbols, read_config, write_config, DATA_DIR, PROJECT_DIRS, TMP_DIR};
 pub use types::{BackendConfig, GHSSymbols};
 

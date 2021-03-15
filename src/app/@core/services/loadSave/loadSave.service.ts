@@ -12,7 +12,7 @@ const logger = new Logger('service.loadSave');
   providedIn: 'root',
 })
 export class LoadSaveService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) { }
 
   saveDocument(fileType: string, filename: string, doc: CaBr2Document): Observable<string> {
     switch (fileType) {
@@ -29,9 +29,17 @@ export class LoadSaveService {
 
       case 'pdf':
         // TODO downloadlink
-        return this.httpClient.post<string>('http://127.0.0.1:3030/api/v1/loadSave/saveDocument', {
-          fileType,
-          doc,
+        return new Observable((sub) => {
+          this.httpClient.post<SaveDocumentResponse>('http://127.0.0.1:3030/api/v1/loadSave/saveDocument', {
+            fileType,
+            document: doc,
+          }).pipe(first()).subscribe(
+            (res) => {
+              window.open(res.downloadUrl, 'Download');
+              sub.next('');
+            },
+            (err) => sub.error(err),
+          );
         });
 
       default:
@@ -83,3 +91,7 @@ const getFileType = (file: File): string => {
   const fileTypeSplit = file.name.split('.');
   return fileTypeSplit[fileTypeSplit.length - 1];
 };
+
+interface SaveDocumentResponse {
+  downloadUrl: string;
+}
