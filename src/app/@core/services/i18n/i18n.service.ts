@@ -1,9 +1,10 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { strings as DEFAULT_STRINGS } from '../../../../assets/defaultStrings.json';
+import { environment } from '../../../../environments/environment';
 import Logger from '../../utils/logger';
-import { TauriService } from '../tauri/tauri.service';
 
 const logger = new Logger('i18n-service');
 
@@ -13,23 +14,20 @@ export type LocalizedStrings = typeof DEFAULT_STRINGS;
   providedIn: 'root',
 })
 export class I18nService {
-  constructor(private tauriService: TauriService) {}
+  constructor(private httpClient: HttpClient) {}
 
   static getDefaultStrings(): LocalizedStrings {
     return DEFAULT_STRINGS;
   }
 
   getAvailableLanguages(): Observable<LocalizedStringsHeader[]> {
-    return this.tauriService.promisified({
-      cmd: 'getAvailableLanguages',
-    });
+    return this.httpClient.get<LocalizedStringsHeader[]>(environment.baseUrl + 'config/availableLanguages');
   }
 
   getLocalizedStrings(language: string): Observable<LocalizedStrings> {
     return new Observable((sub) => {
-      this.tauriService
-        .promisified<LocalizedStrings>({
-          cmd: 'getLocalizedStrings',
+      this.httpClient
+        .post<LocalizedStrings>(environment.baseUrl + 'config/localizedStrings', {
           language,
         })
         .subscribe(

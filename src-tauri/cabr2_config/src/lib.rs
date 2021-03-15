@@ -1,119 +1,71 @@
-mod cmd;
 mod error;
 mod handler;
 mod types;
 
-use std::env;
-
-use tauri::{self, plugin::Plugin};
-
-use cmd::Cmd;
+use std::convert::Infallible;
 
 pub use handler::{get_hazard_symbols, read_config, write_config, DATA_DIR, PROJECT_DIRS, TMP_DIR};
 pub use types::{BackendConfig, GHSSymbols};
 
+use serde::Deserialize;
+use serde_json::Value;
+use warp::{hyper::StatusCode, Reply};
+
 pub struct Config;
 
-impl Plugin for Config {
-  fn extend_api(&self, webview: &mut tauri::Webview, payload: &str) -> Result<bool, String> {
-    match serde_json::from_str(payload) {
-      Err(e) => Err(e.to_string()),
-      Ok(command) => {
-        log::trace!("command: {:?}", &command);
-        match command {
-          Cmd::GetProgramVersion { callback, error } => {
-            tauri::execute_promise(webview, move || Ok(env!("CARGO_PKG_VERSION")), callback, error);
-          }
-          Cmd::GetConfig { callback, error } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_config() {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::SaveConfig {
-            config,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::save_config(config) {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::GetHazardSymbols { callback, error } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_hazard_symbols() {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::GetAvailableLanguages { callback, error } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_available_languages() {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::GetLocalizedStrings {
-            language,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_localized_strings(language) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::GetPromptHtml {
-            name,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_prompt_html(name) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-        }
-        // dispatch of async request should always succeed
-        Ok(true)
-      }
-    }
+pub async fn handle_hazard_symbols() -> Result<impl Reply, Infallible> {
+  match handler::get_hazard_symbols() {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
   }
+}
 
-  fn created(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin created");
+pub async fn handle_program_version() -> Result<impl Reply, Infallible> {
+  Ok(warp::reply::with_status(
+    warp::reply::json(&env!("CARGO_PKG_VERSION")),
+    StatusCode::OK,
+  ))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PromptHtmlBody {
+  name: String,
+}
+
+pub async fn handle_prompt_html(body: PromptHtmlBody) -> Result<impl Reply, Infallible> {
+  match handler::get_prompt_html(body.name) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
   }
+}
 
-  fn ready(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin ready");
+pub async fn handle_available_languages() -> Result<impl Reply, Infallible> {
+  match handler::get_available_languages() {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LocalizedStringsBody {
+  language: String,
+}
+
+pub async fn handle_localized_strings(body: LocalizedStringsBody) -> Result<impl Reply, Infallible> {
+  match handler::get_localized_strings(body.language) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
   }
 }

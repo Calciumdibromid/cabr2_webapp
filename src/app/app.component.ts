@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
       // skip initial config and first load
       configObservable
         .pipe(
-          skip(2),
+          skip(1),
           switchMap((config) => this.configService.saveConfig(config).pipe(first())),
         )
         .subscribe(
@@ -101,6 +101,7 @@ export class AppComponent implements OnInit, OnDestroy {
       ),
     );
 
+    // skip initial config only first load is needed
     configObservable.pipe(first()).subscribe((config) => {
       if (!config.globalSection.acceptedConsent) {
         this.dialog

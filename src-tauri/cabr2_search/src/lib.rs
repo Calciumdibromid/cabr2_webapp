@@ -1,16 +1,19 @@
 #![allow(clippy::new_without_default)]
 #![allow(clippy::unnecessary_unwrap)]
 
-mod cmd;
 mod error;
 mod handler;
 mod types;
 
 mod gestis;
 
-use tauri::plugin::Plugin;
+use std::convert::Infallible;
 
-use cmd::Cmd;
+use serde::Deserialize;
+use serde_json::Value;
+use warp::{hyper::StatusCode, Reply};
+
+use types::{SearchArgument, SearchArguments};
 
 pub struct Search;
 
@@ -23,73 +26,56 @@ impl Search {
   }
 }
 
-impl Plugin for Search {
-  fn extend_api(&self, webview: &mut tauri::Webview, payload: &str) -> Result<bool, String> {
-    match serde_json::from_str(payload) {
-      Err(e) => Err(e.to_string()),
-      Ok(command) => {
-        log::trace!("command: {:?}", &command);
-        match command {
-          Cmd::SearchSuggestions {
-            provider,
-            pattern,
-            search_type,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_quick_search_suggestions(provider, search_type, pattern) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::Search {
-            provider,
-            arguments,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_search_results(provider, arguments) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-          Cmd::GetSubstanceData {
-            provider,
-            identifier,
-            callback,
-            error,
-          } => {
-            tauri::execute_promise(
-              webview,
-              move || match handler::get_substance_data(provider, identifier) {
-                Ok(res) => Ok(res),
-                Err(e) => Err(e.into()),
-              },
-              callback,
-              error,
-            );
-          }
-        }
-        Ok(true)
-      }
-    }
-  }
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SuggenstionBody {
+  provider: String,
+  search_argument: SearchArgument,
+}
 
-  fn created(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin created");
-  }
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ResultBody {
+  provider: String,
+  search_arguments: SearchArguments,
+}
 
-  fn ready(&self, _: &mut tauri::Webview<'_>) {
-    log::trace!("plugin ready");
+#[derive(Debug, Deserialize)]
+pub struct SubstanceBody {
+  provider: String,
+  identifier: String,
+}
+
+pub async fn handle_suggestions(body: SuggenstionBody) -> Result<impl Reply, Infallible> {
+  match handler::get_quick_search_suggestions(
+    body.provider,
+    body.search_argument.search_type,
+    body.search_argument.pattern,
+  ) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
+pub async fn handle_results(body: ResultBody) -> Result<impl Reply, Infallible> {
+  match handler::get_search_results(body.provider, body.search_arguments) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
+pub async fn handle_substances(body: SubstanceBody) -> Result<impl Reply, Infallible> {
+  match handler::get_substance_data(body.provider, body.identifier) {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
   }
 }

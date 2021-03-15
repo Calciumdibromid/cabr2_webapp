@@ -1,10 +1,11 @@
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { GlobalModel } from '../../models/global.model';
-import { TauriService } from '../tauri/tauri.service';
 
 import { SearchArguments, SearchResult, SearchType, SearchTypeMapping, searchTypes } from './search.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class SearchService {
   searchTypeMappingsSubject = new BehaviorSubject<SearchTypeMapping[]>([]);
   searchTypeMappingsObservable = this.searchTypeMappingsSubject.asObservable();
 
-  constructor(private tauriService: TauriService, private globals: GlobalModel) {
+  constructor(private httpClient: HttpClient, private globals: GlobalModel) {
     this.globals.localizedStringsObservable.subscribe((strings) =>
       this.searchTypeMappingsSubject.next(searchTypes.map((t) => ({ viewValue: strings.search.types[t], value: t }))),
     );
@@ -33,11 +34,9 @@ export class SearchService {
    * ```
    */
   searchSuggestions(provider: string, searchType: SearchType, query: string): Observable<string[]> {
-    return this.tauriService.promisified({
-      cmd: 'searchSuggestions',
+    return this.httpClient.post<string[]>(environment.baseUrl + 'search/suggestions', {
       provider,
-      pattern: query,
-      searchType,
+      searchArgument: { searchType, pattern: query },
     });
   }
 
@@ -61,10 +60,9 @@ export class SearchService {
    * ```
    */
   search(provider: string, args: SearchArguments): Observable<SearchResult[]> {
-    return this.tauriService.promisified({
-      cmd: 'search',
+    return this.httpClient.post<SearchResult[]>(environment.baseUrl + 'search/results', {
       provider,
-      arguments: args,
+      searchArguments: args,
     });
   }
 }
