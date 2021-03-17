@@ -9,7 +9,7 @@ mod beryllium;
 mod cabr2;
 mod pdf;
 
-use std::{convert::Infallible, fs, path::PathBuf};
+use std::{convert::Infallible, fs, path::PathBuf, thread, time::Duration};
 
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -136,4 +136,43 @@ pub async fn handle_save_document(body: SaveDocumentBody) -> Result<impl Reply, 
       StatusCode::BAD_REQUEST,
     )),
   }
+}
+
+pub fn start_cleanup_thread() {
+  // i'm sorry for the number of match statements.
+  // this logic should ignore every error and continue working on the next file
+
+  log::info!("Starting cleanup thread...");
+  thread::spawn(|| loop {
+    for path in match fs::read_dir(DOWNLOAD_FOLDER) {
+      Ok(iter) => iter,
+      Err(e) => {
+        log::error!("{:?}", e);
+        break;
+      }
+    } {
+      match path {
+        Ok(path) => match path.metadata() {
+          Ok(data) => match data.modified() {
+            Ok(c_time) => match c_time.elapsed() {
+              Ok(dur) => {
+                if dur.as_secs() > 86400 {
+                  match fs::remove_file(path.path()) {
+                    Ok(_) => log::debug!("deleted file: {:?}", path.path()),
+                    Err(e) => log::error!("{:?}", e),
+                  };
+                }
+              }
+              Err(e) => log::error!("{:?}", e),
+            },
+            Err(e) => log::error!("{:?}", e),
+          },
+          Err(e) => log::error!("{:?}", e),
+        },
+        Err(e) => log::error!("{:?}", e),
+      }
+    }
+
+    thread::sleep(Duration::from_secs(900));
+  });
 }

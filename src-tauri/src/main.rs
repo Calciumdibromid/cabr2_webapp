@@ -148,6 +148,8 @@ async fn main() {
 
   // log::debug!("{:?}", routes);
 
+  cabr2_load_save::start_cleanup_thread();
+
   log::info!("server starting...");
   // On debug builds it runs on `http://localhost:3030`,
   // on release builds it runs on port 80 and listens on every interface.
