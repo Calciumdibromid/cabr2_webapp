@@ -1,9 +1,9 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { GlobalModel } from '../../models/global.model';
-import { TauriService } from '../tauri/tauri.service';
 
 import {
   Provider,
@@ -14,6 +14,7 @@ import {
   SearchTypeMapping,
   searchTypes,
 } from './provider.model';
+import { environment } from 'src/environments/environment';
 import { SubstanceData } from '../../models/substances.model';
 
 @Injectable({
@@ -26,7 +27,7 @@ export class ProviderService {
   providerMappingsSubject = new BehaviorSubject<ProviderMapping>(new Map());
   providerMappingsObservable = this.providerMappingsSubject.asObservable();
 
-  constructor(private tauriService: TauriService, private globals: GlobalModel) {
+  constructor(private httpClient: HttpClient, private globals: GlobalModel) {
     this.globals.localizedStringsObservable.subscribe((strings) =>
       this.searchTypeMappingsSubject.next(searchTypes.map((t) => ({ viewValue: strings.search.types[t], value: t }))),
     );
@@ -51,9 +52,7 @@ export class ProviderService {
    * ```
    */
   getAvailableProviders(): Observable<Provider[]> {
-    return this.tauriService.promisified({
-      cmd: 'getAvailableProviders',
-    });
+    return this.httpClient.get<Provider[]>(environment.baseUrl + 'search/availableProviders');
   }
 
   /**
@@ -70,11 +69,9 @@ export class ProviderService {
    * ```
    */
   searchSuggestions(provider: string, searchType: SearchType, query: string): Observable<string[]> {
-    return this.tauriService.promisified({
-      cmd: 'searchSuggestions',
+    return this.httpClient.post<string[]>(environment.baseUrl + 'search/suggestions', {
       provider,
-      pattern: query,
-      searchType,
+      searchArgument: { searchType, pattern: query },
     });
   }
 
@@ -98,10 +95,9 @@ export class ProviderService {
    * ```
    */
   search(provider: string, args: SearchArguments): Observable<SearchResult[]> {
-    return this.tauriService.promisified({
-      cmd: 'search',
+    return this.httpClient.post<SearchResult[]>(environment.baseUrl + 'search/results', {
       provider,
-      arguments: args,
+      searchArguments: args,
     });
   }
 
@@ -110,8 +106,7 @@ export class ProviderService {
    * stating the cause of the failure when parsing the data.
    */
   substanceData(provider: string, identifier: string): Observable<SubstanceData> {
-    return this.tauriService.promisified({
-      cmd: 'getSubstanceData',
+    return this.httpClient.post<SubstanceData>(environment.baseUrl + 'search/substances', {
       provider,
       identifier,
     });

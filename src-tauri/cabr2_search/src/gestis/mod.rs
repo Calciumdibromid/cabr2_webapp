@@ -1,6 +1,8 @@
 mod types;
 mod xml_parser;
 
+use std::thread;
+
 use cabr2_types::{Data, Source, SubstanceData};
 use types::GestisResponse;
 use ureq::Agent;
@@ -79,11 +81,17 @@ impl Provider for Gestis {
 
     let json: GestisResponse = res.into_json_deserialize()?;
 
-    let data = xml_parser::parse_response(&json)?;
+    let name = Data::new(json.name.clone());
+    let alternative_names = json.aliases.iter().map(|a| a.name.clone()).collect();
+
+    let data = match thread::spawn(move || xml_parser::parse_response(&json)).join() {
+      Ok(data) => data?,
+      Err(_) => return Err(SearchError::GestisError),
+    };
 
     let res_data = SubstanceData {
-      name: Data::new(json.name.clone()),
-      alternative_names: json.aliases.into_iter().map(|a| a.name).collect(),
+      name,
+      alternative_names,
       cas: Data::new(data.cas),
       molecular_formula: Data::new(data.molecular_formula),
       molar_mass: Data::new(data.molar_mass),
