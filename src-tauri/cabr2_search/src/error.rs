@@ -2,6 +2,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SearchError {
+  #[error("gestis failed our expectation (again)")]
+  GestisError,
+
   #[error("unknown provider: {0}")]
   UnknownProvider(String),
 

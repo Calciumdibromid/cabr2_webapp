@@ -46,6 +46,16 @@ pub struct SubstanceBody {
   identifier: String,
 }
 
+pub async fn handle_available_providers() -> Result<impl Reply, Infallible> {
+  match handler::get_available_providers() {
+    Ok(res) => Ok(warp::reply::with_status(warp::reply::json(&res), StatusCode::OK)),
+    Err(err) => Ok(warp::reply::with_status(
+      warp::reply::json(&Value::String(err.to_string())),
+      StatusCode::BAD_REQUEST,
+    )),
+  }
+}
+
 pub async fn handle_suggestions(body: SuggenstionBody) -> Result<impl Reply, Infallible> {
   match handler::get_quick_search_suggestions(
     body.provider,

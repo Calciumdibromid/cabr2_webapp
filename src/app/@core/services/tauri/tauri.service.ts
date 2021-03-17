@@ -11,9 +11,11 @@ const logCall = (name: string) => logger.error('called inaccessible tauri servic
   providedIn: 'root',
 })
 export class TauriService {
-  openUrl = window.open;
+  openUrl(url: string): void {
+    window.open(url, '_blank');
+  }
 
-  open(options?: any): Observable<string | string[]> {
+  open(_?: any): Observable<string | string[]> {
     return new Observable((sub) => {
       const hiddenFileHack = document.getElementById('hiddenFileHack') as any;
       hiddenFileHack?.addEventListener(
@@ -34,7 +36,7 @@ export class TauriService {
     });
   }
 
-  promisified<T>(args: any): Observable<T> {
+  promisified<T>(_: any): Observable<T> {
     logCall('promisified');
     return new Observable();
   }

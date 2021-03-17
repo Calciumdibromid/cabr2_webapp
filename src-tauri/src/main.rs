@@ -20,6 +20,11 @@ async fn main() {
   handle_result(fs::create_dir_all(DOWNLOAD_FOLDER));
   handle_result(fs::create_dir(CACHE_FOLDER));
 
+  let search_available_providers = warp::path("availableProviders")
+    .and(warp::path::end())
+    .and(warp::get())
+    .and_then(cabr2_search::handle_available_providers);
+
   let search_suggestions = warp::path("suggestions")
     .and(warp::post())
     .and(warp::body::json())
@@ -37,7 +42,8 @@ async fn main() {
     .and(warp::body::json())
     .and_then(cabr2_search::handle_substances);
 
-  let search = warp::path("search").and(search_suggestions.or(search_results.or(search_substances)));
+  let search = warp::path("search")
+    .and(search_available_providers.or(search_suggestions.or(search_results.or(search_substances))));
 
   let config_programversion = warp::path("programVersion")
     .and(warp::path::end())
