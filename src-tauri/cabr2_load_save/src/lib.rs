@@ -121,7 +121,7 @@ pub async fn handle_save_document(body: SaveDocumentBody) -> Result<impl Reply, 
     }
   }
 
-  let reply = match handler::save_document(body.file_type.clone(), path.clone(), body.document) {
+  match handler::save_document(body.file_type.clone(), path, body.document) {
     Ok(_) => Ok(warp::reply::with_status(
       warp::reply::json(&SaveDocumentResponse {
         #[cfg(not(debug_assertions))]
@@ -135,9 +135,5 @@ pub async fn handle_save_document(body: SaveDocumentBody) -> Result<impl Reply, 
       warp::reply::json(&Value::String(err.to_string())),
       StatusCode::BAD_REQUEST,
     )),
-  };
-
-  // TODO trigger deletion of generated file after 24h
-
-  reply
+  }
 }

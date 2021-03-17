@@ -26,7 +26,7 @@ export default class Logger {
   /**
    * Logs all arguments space separated with the level `TRACE`.
    */
-  trace(...messages: any[]): void {
+  trace(..._: any[]): void {
     // console.log('[TRACE]', this.path, ...messages);
   }
 
