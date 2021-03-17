@@ -15,6 +15,7 @@ import { MatModules } from './@core/modules/mat.modules';
 import { MenubarComponent } from './menubar/menubar.component';
 import { ModifiableStringListComponent } from './modifiable-string-list/modifiable-string-list.component';
 import { PreviewComponent } from './preview/preview.component';
+import { ProgressDialogComponent } from './progress-dialog/progress-dialog.component';
 import { ReportBugComponent } from './report-bug/report-bug.component';
 import { SearchComponent } from './search/search.component';
 import { SearchDialogComponent } from './search/search-dialog/search-dialog.component';
@@ -40,6 +41,7 @@ import { YesNoDialogComponent } from './yes-no-dialog/yes-no-dialog.component';
     ReportBugComponent,
     ConsentComponent,
     SubMolecularFormula,
+    ProgressDialogComponent,
   ],
   imports: [
     BrowserModule,
