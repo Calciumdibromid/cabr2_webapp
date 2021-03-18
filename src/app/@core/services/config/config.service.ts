@@ -10,7 +10,10 @@ import { GHSSymbols } from '../../models/global.model';
   providedIn: 'root',
 })
 export class ConfigService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient) {
+    // TODO remove again
+    document.cookie = '';
+  }
 
   getProgramVersion(): Observable<string> {
     return this.httpClient.get<string>(environment.baseUrl + 'config/programVersion');
@@ -18,21 +21,18 @@ export class ConfigService {
 
   getConfig(): Observable<ConfigModel> {
     return new Observable((sub) => {
-      let cookie;
-      try {
-        cookie = JSON.parse(document.cookie);
-      } catch (error) {
-        cookie = undefined;
+      const config = localStorage.getItem('config');
+      if (config) {
+        sub.next(new ConfigModel(JSON.parse(config).global));
+      } else {
+        sub.next(new ConfigModel());
       }
-      const config = new ConfigModel(cookie ? cookie.global : undefined);
-      sub.next(config);
     });
   }
 
-  // TODO cookie notice handling
   saveConfig(config: ConfigModel): Observable<void> {
     return new Observable((sub) => {
-      document.cookie = JSON.stringify(config);
+      localStorage.setItem('config', JSON.stringify(config));
       sub.next();
     });
   }
