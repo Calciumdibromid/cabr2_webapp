@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditSearchResultsComponent } from './edit-search-results.component';
+import { ProgressDialogComponent } from './progress-dialog.component';
 
-describe('EditSearchResultsComponent', () => {
-  let component: EditSearchResultsComponent;
-  let fixture: ComponentFixture<EditSearchResultsComponent>;
+describe('YesNoDialogComponent', () => {
+  let component: ProgressDialogComponent;
+  let fixture: ComponentFixture<ProgressDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EditSearchResultsComponent],
+      declarations: [ProgressDialogComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditSearchResultsComponent);
+    fixture = TestBed.createComponent(ProgressDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

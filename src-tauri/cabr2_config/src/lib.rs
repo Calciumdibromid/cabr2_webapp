@@ -11,6 +11,9 @@ use serde::Deserialize;
 use serde_json::Value;
 use warp::{hyper::StatusCode, Reply};
 
+// make clippy happy
+pub use handler::{get_config, save_config};
+
 pub struct Config;
 
 pub async fn handle_hazard_symbols() -> Result<impl Reply, Infallible> {

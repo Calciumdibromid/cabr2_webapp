@@ -6,6 +6,8 @@ import { Observable } from 'rxjs';
 import { CaBr2Document, DocumentTypes } from './loadSave.model';
 import { environment } from '../../../../environments/environment';
 import Logger from '../../utils/logger';
+import { MatDialog } from '@angular/material/dialog';
+import { ProgressDialogComponent } from 'src/app/progress-dialog/progress-dialog.component';
 
 const logger = new Logger('service.loadSave');
 
@@ -13,7 +15,7 @@ const logger = new Logger('service.loadSave');
   providedIn: 'root',
 })
 export class LoadSaveService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private dialog: MatDialog) {}
 
   saveDocument(fileType: string, filename: string, doc: CaBr2Document): Observable<string> {
     switch (fileType) {
@@ -29,21 +31,21 @@ export class LoadSaveService {
         });
 
       case 'pdf':
-        // TODO downloadlink
         return new Observable((sub) => {
-          this.httpClient
+          const download = this.httpClient
             .post<SaveDocumentResponse>(environment.baseUrl + 'loadSave/saveDocument', {
               fileType,
               document: doc,
             })
-            .pipe(first())
-            .subscribe(
-              (res) => {
-                window.open(res.downloadUrl, 'Download');
-                sub.next('');
-              },
-              (err) => sub.error(err),
-            );
+            .pipe(first());
+
+          this.dialog.open(ProgressDialogComponent, {
+            panelClass: ['unselectable', 'undragable'],
+            data: {
+              download,
+              subscriber: sub,
+            },
+          });
         });
 
       default:
