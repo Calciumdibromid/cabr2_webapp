@@ -1,0 +1,152 @@
+{
+  "name": "Русский",
+  "locale": "ru_ru",
+  "strings": {
+    "base": {
+      "addElement": "Добавить элемент",
+      "removeElement": "Удалить элемент",
+      "print": "Печать",
+      "cancel": "Отмена",
+      "ok": "Хорошо",
+      "save": "Сохранить",
+      "close": "Закрыть"
+    },
+    "menu": {
+      "newDocument": "Новые инструкция",
+      "loadFile": "Открыть новыю инструкцию",
+      "saveFile": "Сохранить новыю инструкцию",
+      "exportPDF": "Вывозить в PDF",
+      "settings": "Отношение",
+      "quickStart": "Руководство"
+    },
+    "settings": {
+      "language": "Язык",
+      "reloadRequired": "Требуется перезагрузка",
+      "darkModeSwitchInfo": "Переключить светлую/темную тему"
+    },
+    "bugreport": {
+      "title": "Сообщить об ошибке",
+      "sentence": "Сообщить об ошибке по следующей почте:"
+    },
+    "header": {
+      "docTitle": "Название документа:",
+      "organisation": "Организация:",
+      "labCourse": "Лаборатория / Курс:",
+      "name": "Имя:",
+      "place": "Место:",
+      "assistant": "Помощник:",
+      "preparation": "Подготовка/задача:"
+    },
+    "search": {
+      "types": {
+        "chemicalName": "Химический материалы",
+        "chemicalFormula": "Молекулярная формула",
+        "numbers": "Номер",
+        "fullText": "Весь текст"
+      },
+      "exact": "Точное совпадение",
+      "option": "Параметры поиска:",
+      "searchButton": "Поиск",
+      "removeSubstance": "Удалить субстанция",
+      "editSubstance": "Редактировать субстанция",
+      "removeOption": "Удалить опцию поиска",
+      "addOption": "Добавить опцию поиска",
+      "resultsHeader": "Найти результаты",
+      "noResult": "Нет результата",
+      "customSubstance": "Пользовательский",
+      "unsupportedProviderInfo": "не поддерживается",
+      "error": "Ошибка при получении данных"
+    },
+    "substance": {
+      "edited": "Переработанный?",
+      "name": "Название",
+      "needsName": "Введите имя",
+      "casNumber": "Номер CAS",
+      "molecularFormula": "Молекулярная формула",
+      "waterHazardClass": "Класс опасности для воды",
+      "signalWord": "Сигнальное слово",
+      "molarMass": "Молярная масса",
+      "unit": "Единство",
+      "lethalDose": "Смертельная доза",
+      "mak": "MAK",
+      "meltingPoint": "Температура плавления",
+      "boilingPoint": "Точка кипения",
+      "amount": "Количество",
+      "notANumber": "Нет число",
+      "customUnit": "Нестандартная единица",
+      "hPhrases": "Заявления об опасности",
+      "noHPhrase": "Недействительный Предупреждения об опасности",
+      "removeHPhrase": "удалить Предупреждения об опасности",
+      "addHPhrase": "добавить Предупреждение об опасности",
+      "pPhrases": "P-phrases",
+      "noPPhrase": "Invalid P-number",
+      "removePPhrase": "remove P-phrase",
+      "addPPhrase": "add P-phrase",
+      "editingHint": "Click on substance to edit.",
+      "ghsSymbolsAddOrRemoveInfo": "To remove or add click on the symbol",
+      "ghsSymbolsColorInfo": "gray: not selected / colorized: selected",
+      "addCustomSubstanceData": "Add custom substance"
+    },
+    "descriptions": {
+      "humanAndEnvironmentDanger": "Additional dangers for humans and environment (e.g. carcinogenic, teratogenic):",
+      "rulesOfConduct": "Protective measures and safety rules:",
+      "inCaseOfDanger": "Behavior in case of danger and first aid:",
+      "disposal": "Disposal:",
+      "humanAndEnvironmentDangerShort": "Dangers",
+      "rulesOfConductShort": "Protection measures",
+      "inCaseOfDangerShort": "Hazard case",
+      "disposalShort": "Disposal",
+      "signatureFieldStudent": "I hereby confirm that I will execute the task/preparation according to the here presented safety data instructions.",
+      "signatureFieldAssistant": "The student is allowed to perform the presented task/preparation."
+    },
+    "preview": {
+      "info": "This is only a preview. The generated PDF may look different!",
+      "tableSubstanceTitleHeader": "Used substances and products",
+      "tableMolarMassHeader": {
+        "mw": "MW",
+        "grammPerMol": "[g/mol]"
+      },
+      "tableBoilingHeader": "BP",
+      "tableMeltingHeader": "MP",
+      "tableGHSSymbolHeader": "GHS hazard pictograms",
+      "tableHPPhrasesHeader": "H/P-phrases",
+      "tableHPPhrasesNumberHeader": "(numbers)",
+      "tableMAKHeader": "MAC, LD50",
+      "tableWHCHeader": "WHC",
+      "tableAmountHeader": "Amount used",
+      "tableHPPhrasesTitle": "Text of essential H/P phrases:",
+      "sources": "Sources"
+    },
+    "error": {
+      "substanceWithCASExist": "Substance with identical CAS number exists already!",
+      "substanceLoadData": "Failed to load substance data!",
+      "editSubstance": "Edit substance failed!",
+      "configLoad": "Failed to read configuration!",
+      "configSave": "Failed to save configuration!",
+      "getHazardSymbols": "Failed to load hazard symbols!",
+      "loadSearchSuggestions": "Failed to load search suggestions!",
+      "loadSearchResults": "Failed to load search results!",
+      "getAvailableDocumentTypes": "Failed to load available document types!",
+      "loadFile": "Failed loading file!",
+      "saveFile": "Saving file failed!",
+      "exportPDF": "Exporting PDF failed!",
+      "localeLoading": "Failed to load language!"
+    },
+    "success": {
+      "loadFile": "File successfully loaded",
+      "saveFile": "File saved successfully",
+      "exportPDF": "PDF exported successfully"
+    },
+    "dialogs": {
+      "unchangedValues": {
+        "title": "Unchanged values",
+        "content": [
+          "The following values were not changed."
+        ],
+        "footer": [
+          "Continue anyway?"
+        ]
+      }
+    }
+  }
+}
