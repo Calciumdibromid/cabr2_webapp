@@ -18,7 +18,7 @@
 </p>
 <mat-divider></mat-divider>
 <mat-dialog-actions>
-  <button (click)="dialogRef.close()" [disabled]="timer > 0" mat-raised-button>
+  <button (click)="closeConsent()" [disabled]="timer > 0" mat-raised-button>
     {{ strings.base.ok }} {{ timer > 0 ? '(' + timer + ')' : '' }}
   </button>
 </mat-dialog-actions>
